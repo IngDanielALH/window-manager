@@ -2,15 +2,33 @@ from unittest.mock import MagicMock, patch
 import pytest
 import src.hotkeys as hk
 
+EXPECTED_SHORTCUTS = [
+    "<ctrl>+<alt>+<left>",
+    "<ctrl>+<alt>+<right>",
+    "<ctrl>+<alt>+<up>",
+    "<ctrl>+<alt>+<down>",
+    "<ctrl>+<alt>+<enter>",
+    "<ctrl>+<alt>+u",
+    "<ctrl>+<alt>+i",
+    "<ctrl>+<alt>+j",
+    "<ctrl>+<alt>+k",
+    "<ctrl>+<alt>+d",
+    "<ctrl>+<alt>+f",
+    "<ctrl>+<alt>+g",
+    "<ctrl>+<alt>+e",
+    "<ctrl>+<alt>+r",
+    "<ctrl>+<alt>+t",
+    "<ctrl>+<alt>+c",
+    "<ctrl>+<alt>+<shift>+<right>",
+    "<ctrl>+<alt>+<shift>+<left>",
+]
+
 
 class TestHotkeyMap:
-    def test_all_magnet_shortcuts_are_registered(self):
+    def test_all_shortcuts_registered(self):
         keys = list(hk.HOTKEY_MAP.keys())
-        assert "<ctrl>+<alt>+<left>" in keys
-        assert "<ctrl>+<alt>+<right>" in keys
-        assert "<ctrl>+<alt>+<up>" in keys
-        assert "<ctrl>+<alt>+<down>" in keys
-        assert "<ctrl>+<alt>+<enter>" in keys
+        for shortcut in EXPECTED_SHORTCUTS:
+            assert shortcut in keys, f"Missing shortcut: {shortcut}"
 
     def test_hotkey_map_values_are_callable(self):
         for combo, action in hk.HOTKEY_MAP.items():

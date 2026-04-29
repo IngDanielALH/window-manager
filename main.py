@@ -4,11 +4,20 @@ import subprocess
 import sys
 
 SHORTCUTS = [
-    "  ⌃⌥←   Snap left",
-    "  ⌃⌥→   Snap right",
-    "  ⌃⌥↑   Snap top",
-    "  ⌃⌥↓   Snap bottom",
-    "  ⌃⌥↩   Fullscreen",
+    "  Halves",
+    "    ⌃⌥←       Left        ⌃⌥→       Right",
+    "    ⌃⌥↑       Top         ⌃⌥↓       Bottom",
+    "  Fullscreen & Center",
+    "    ⌃⌥↩       Fullscreen  ⌃⌥C       Center",
+    "  Quarters",
+    "    ⌃⌥U       Top Left    ⌃⌥I       Top Right",
+    "    ⌃⌥J       Bottom Left ⌃⌥K       Bottom Right",
+    "  Thirds",
+    "    ⌃⌥D       Left        ⌃⌥F       Center      ⌃⌥G       Right",
+    "  Two Thirds",
+    "    ⌃⌥E       Left        ⌃⌥R       Center      ⌃⌥T       Right",
+    "  Displays",
+    "    ⌃⌥⇧→      Next        ⌃⌥⇧←      Previous",
 ]
 
 
