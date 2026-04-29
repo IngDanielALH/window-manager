@@ -59,31 +59,31 @@ class TestGetFocusedWindow:
     def test_returns_window_on_success(self):
         import sys
         ax = sys.modules["ApplicationServices"]
-        appkit = sys.modules["AppKit"]
 
-        fake_pid = 1234
-        fake_app_element = MagicMock()
+        fake_system = MagicMock()
+        fake_app = MagicMock()
         fake_window = MagicMock()
 
-        appkit.NSWorkspace.reset_mock()
-        ax.AXUIElementCreateApplication.reset_mock()
+        ax.AXUIElementCreateSystemWide.return_value = fake_system
         ax.AXUIElementCopyAttributeValue.reset_mock()
-
-        appkit.NSWorkspace.sharedWorkspace.return_value.frontmostApplication.return_value.processIdentifier.return_value = fake_pid
-        ax.AXUIElementCreateApplication.return_value = fake_app_element
-        ax.AXUIElementCopyAttributeValue.return_value = (ax.kAXErrorSuccess, fake_window)
+        ax.AXUIElementCopyAttributeValue.side_effect = [
+            (ax.kAXErrorSuccess, fake_app),
+            (ax.kAXErrorSuccess, fake_window),
+        ]
 
         from src.window_controller import _get_focused_window
         result = _get_focused_window()
 
-        ax.AXUIElementCreateApplication.assert_called_once_with(fake_pid)
+        ax.AXUIElementCreateSystemWide.assert_called()
         assert result is fake_window
 
-    def test_returns_none_when_no_frontmost_app(self):
+    def test_returns_none_when_no_focused_app(self):
         import sys
-        appkit = sys.modules["AppKit"]
-        appkit.NSWorkspace.reset_mock()
-        appkit.NSWorkspace.sharedWorkspace.return_value.frontmostApplication.return_value = None
+        ax = sys.modules["ApplicationServices"]
+
+        ax.AXUIElementCreateSystemWide.return_value = MagicMock()
+        ax.AXUIElementCopyAttributeValue.reset_mock()
+        ax.AXUIElementCopyAttributeValue.side_effect = [(1, None)]  # error on first call
 
         from src.window_controller import _get_focused_window
         result = _get_focused_window()
@@ -93,15 +93,13 @@ class TestGetFocusedWindow:
     def test_returns_none_on_ax_error(self):
         import sys
         ax = sys.modules["ApplicationServices"]
-        appkit = sys.modules["AppKit"]
 
-        appkit.reset_mock()
+        ax.AXUIElementCreateSystemWide.return_value = MagicMock()
         ax.AXUIElementCopyAttributeValue.reset_mock()
-
-        fake_app = MagicMock()
-        fake_app.processIdentifier.return_value = 42
-        appkit.NSWorkspace.sharedWorkspace.return_value.frontmostApplication.return_value = fake_app
-        ax.AXUIElementCopyAttributeValue.return_value = (1, None)  # non-zero = error
+        ax.AXUIElementCopyAttributeValue.side_effect = [
+            (ax.kAXErrorSuccess, MagicMock()),
+            (1, None),  # error on focused window call
+        ]
 
         from src.window_controller import _get_focused_window
         result = _get_focused_window()

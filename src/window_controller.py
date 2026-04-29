@@ -1,16 +1,17 @@
 from ApplicationServices import (
-    AXUIElementCreateApplication,
+    AXUIElementCreateSystemWide,
     AXUIElementCopyAttributeValue,
     AXUIElementSetAttributeValue,
     AXValueCreate,
     kAXErrorSuccess,
+    kAXFocusedApplicationAttribute,
     kAXFocusedWindowAttribute,
     kAXPositionAttribute,
     kAXSizeAttribute,
     kAXValueTypeCGPoint,
     kAXValueTypeCGSize,
 )
-from AppKit import NSScreen, NSWorkspace
+from AppKit import NSScreen
 import Quartz
 
 
@@ -29,13 +30,11 @@ def _move_window(window, x, y, w, h):
 
 
 def _get_focused_window():
-    workspace = NSWorkspace.sharedWorkspace()
-    app = workspace.frontmostApplication()
-    if app is None:
+    system = AXUIElementCreateSystemWide()
+    err, app = AXUIElementCopyAttributeValue(system, kAXFocusedApplicationAttribute, None)
+    if err != kAXErrorSuccess or app is None:
         return None
-    pid = app.processIdentifier()
-    ax_app = AXUIElementCreateApplication(pid)
-    err, window = AXUIElementCopyAttributeValue(ax_app, kAXFocusedWindowAttribute, None)
+    err, window = AXUIElementCopyAttributeValue(app, kAXFocusedWindowAttribute, None)
     if err != kAXErrorSuccess:
         return None
     return window
