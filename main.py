@@ -26,8 +26,12 @@ def main():
     print("\nPress Ctrl+C to quit.\n")
 
     listener = start_listener()
-    listener.start()
-    listener.join()
+    try:
+        listener.start()
+        listener.join()
+    except KeyboardInterrupt:
+        listener.stop()
+        print("\nStopped.")
 
 
 if __name__ == "__main__":
