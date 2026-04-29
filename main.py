@@ -1,5 +1,6 @@
 from ApplicationServices import AXIsProcessTrusted
 from src.hotkeys import start_listener
+import subprocess
 import sys
 
 SHORTCUTS = [
@@ -16,8 +17,14 @@ def main():
         print(
             "Accessibility permission required.\n"
             "Go to: System Settings → Privacy & Security → Accessibility\n"
-            "Enable your terminal app (e.g. Terminal, iTerm2), then re-run."
+            "Enable your terminal app (e.g. Terminal, iTerm2), then re-run.\n"
         )
+        answer = input("Open System Settings now? [y/N]: ").strip().lower()
+        if answer == "y":
+            subprocess.run(
+                ["open", "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility"],
+                check=False,
+            )
         sys.exit(1)
 
     print("Window Manager running. Active shortcuts:")
