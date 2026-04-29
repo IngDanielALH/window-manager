@@ -53,3 +53,57 @@ class TestMoveWindow:
             call(fake_window, ax.kAXSizeAttribute, fake_size_val),
         ]
         assert ax.AXUIElementSetAttributeValue.call_args_list == expected_calls
+
+
+class TestGetFocusedWindow:
+    def test_returns_window_on_success(self):
+        import sys
+        ax = sys.modules["ApplicationServices"]
+        appkit = sys.modules["AppKit"]
+
+        fake_pid = 1234
+        fake_app_element = MagicMock()
+        fake_window = MagicMock()
+
+        appkit.NSWorkspace.reset_mock()
+        ax.AXUIElementCreateApplication.reset_mock()
+        ax.AXUIElementCopyAttributeValue.reset_mock()
+
+        appkit.NSWorkspace.sharedWorkspace.return_value.frontmostApplication.return_value.processIdentifier.return_value = fake_pid
+        ax.AXUIElementCreateApplication.return_value = fake_app_element
+        ax.AXUIElementCopyAttributeValue.return_value = (ax.kAXErrorSuccess, fake_window)
+
+        from src.window_controller import _get_focused_window
+        result = _get_focused_window()
+
+        ax.AXUIElementCreateApplication.assert_called_once_with(fake_pid)
+        assert result is fake_window
+
+    def test_returns_none_when_no_frontmost_app(self):
+        import sys
+        appkit = sys.modules["AppKit"]
+        appkit.NSWorkspace.reset_mock()
+        appkit.NSWorkspace.sharedWorkspace.return_value.frontmostApplication.return_value = None
+
+        from src.window_controller import _get_focused_window
+        result = _get_focused_window()
+
+        assert result is None
+
+    def test_returns_none_on_ax_error(self):
+        import sys
+        ax = sys.modules["ApplicationServices"]
+        appkit = sys.modules["AppKit"]
+
+        appkit.reset_mock()
+        ax.AXUIElementCopyAttributeValue.reset_mock()
+
+        fake_app = MagicMock()
+        fake_app.processIdentifier.return_value = 42
+        appkit.NSWorkspace.sharedWorkspace.return_value.frontmostApplication.return_value = fake_app
+        ax.AXUIElementCopyAttributeValue.return_value = (1, None)  # non-zero = error
+
+        from src.window_controller import _get_focused_window
+        result = _get_focused_window()
+
+        assert result is None
