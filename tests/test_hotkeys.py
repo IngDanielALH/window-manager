@@ -6,10 +6,10 @@ import src.hotkeys as hk
 class TestHotkeyMap:
     def test_all_magnet_shortcuts_are_registered(self):
         keys = list(hk.HOTKEY_MAP.keys())
-        assert "<ctrl>+<alt>+left" in keys
-        assert "<ctrl>+<alt>+right" in keys
-        assert "<ctrl>+<alt>+up" in keys
-        assert "<ctrl>+<alt>+down" in keys
+        assert "<ctrl>+<alt>+<left>" in keys
+        assert "<ctrl>+<alt>+<right>" in keys
+        assert "<ctrl>+<alt>+<up>" in keys
+        assert "<ctrl>+<alt>+<down>" in keys
         assert "<ctrl>+<alt>+<enter>" in keys
 
     def test_hotkey_map_values_are_callable(self):

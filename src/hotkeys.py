@@ -8,10 +8,10 @@ from src.window_controller import (
 )
 
 HOTKEY_MAP = {
-    "<ctrl>+<alt>+left": snap_left,
-    "<ctrl>+<alt>+right": snap_right,
-    "<ctrl>+<alt>+up": snap_top,
-    "<ctrl>+<alt>+down": snap_bottom,
+    "<ctrl>+<alt>+<left>": snap_left,
+    "<ctrl>+<alt>+<right>": snap_right,
+    "<ctrl>+<alt>+<up>": snap_top,
+    "<ctrl>+<alt>+<down>": snap_bottom,
     "<ctrl>+<alt>+<enter>": snap_fullscreen,
 }
 
