@@ -32,12 +32,15 @@ class TestMain:
             check=False,
         )
 
-    def test_starts_listener_when_trusted(self):
-        fake_listener = MagicMock()
+    def test_starts_listener_and_runs_loop_when_trusted(self):
+        fake_monitor = MagicMock()
         with patch("main.AXIsProcessTrusted", return_value=True), \
-             patch("main.start_listener", return_value=fake_listener):
+             patch("main.start_listener", return_value=fake_monitor), \
+             patch("main.NSRunLoop") as mock_runloop, \
+             patch("main.NSDate"), \
+             patch("main.NSEvent") as mock_event:
+            mock_runloop.mainRunLoop.return_value.runUntilDate_.side_effect = KeyboardInterrupt
             import main
             main.main()
 
-        fake_listener.start.assert_called_once()
-        fake_listener.join.assert_called_once()
+        mock_event.removeMonitor_.assert_called_once_with(fake_monitor)

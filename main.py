@@ -1,4 +1,5 @@
 from ApplicationServices import AXIsProcessTrusted
+from AppKit import NSEvent, NSRunLoop, NSDate
 from src.hotkeys import start_listener
 import subprocess
 import sys
@@ -41,12 +42,12 @@ def main():
         print(s)
     print("\nPress Ctrl+C to quit.\n")
 
-    listener = start_listener()
+    monitor = start_listener()
     try:
-        listener.start()
-        listener.join()
+        while True:
+            NSRunLoop.mainRunLoop().runUntilDate_(NSDate.dateWithTimeIntervalSinceNow_(0.5))
     except KeyboardInterrupt:
-        listener.stop()
+        NSEvent.removeMonitor_(monitor)
         print("\nStopped.")
 
 
