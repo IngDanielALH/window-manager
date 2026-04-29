@@ -12,6 +12,9 @@ venv/
 .coverage
 htmlcov/
 
+# JetBrains IDEs
+.idea/
+
 # Claude / Superpowers
 .claude/
 docs/superpowers/
