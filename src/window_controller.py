@@ -39,3 +39,43 @@ def _get_focused_window():
     if err != kAXErrorSuccess:
         return None
     return window
+
+
+def snap_left():
+    window = _get_focused_window()
+    if window is None:
+        return
+    x, y, w, h = _get_screen_frame()
+    _move_window(window, x, y, w / 2, h)
+
+
+def snap_right():
+    window = _get_focused_window()
+    if window is None:
+        return
+    x, y, w, h = _get_screen_frame()
+    _move_window(window, x + w / 2, y, w / 2, h)
+
+
+def snap_top():
+    window = _get_focused_window()
+    if window is None:
+        return
+    x, y, w, h = _get_screen_frame()
+    _move_window(window, x, y + h / 2, w, h / 2)
+
+
+def snap_bottom():
+    window = _get_focused_window()
+    if window is None:
+        return
+    x, y, w, h = _get_screen_frame()
+    _move_window(window, x, y, w, h / 2)
+
+
+def snap_fullscreen():
+    window = _get_focused_window()
+    if window is None:
+        return
+    x, y, w, h = _get_screen_frame()
+    _move_window(window, x, y, w, h)

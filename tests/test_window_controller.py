@@ -107,3 +107,56 @@ class TestGetFocusedWindow:
         result = _get_focused_window()
 
         assert result is None
+
+
+class TestSnapFunctions:
+    """Each snap function: get window, compute target frame, call _move_window."""
+
+    SCREEN = (0, 23, 1920, 1057)  # x, y, w, h from visibleFrame
+
+    def _setup(self, monkeypatch):
+        import src.window_controller as wc
+        fake_window = MagicMock()
+        monkeypatch.setattr(wc, "_get_focused_window", lambda: fake_window)
+        monkeypatch.setattr(wc, "_get_screen_frame", lambda: self.SCREEN)
+        mock_move = MagicMock()
+        monkeypatch.setattr(wc, "_move_window", mock_move)
+        return fake_window, mock_move
+
+    def test_snap_left(self, monkeypatch):
+        import src.window_controller as wc
+        w, move = self._setup(monkeypatch)
+        wc.snap_left()
+        move.assert_called_once_with(w, 0, 23, 960, 1057)
+
+    def test_snap_right(self, monkeypatch):
+        import src.window_controller as wc
+        w, move = self._setup(monkeypatch)
+        wc.snap_right()
+        move.assert_called_once_with(w, 960, 23, 960, 1057)
+
+    def test_snap_top(self, monkeypatch):
+        import src.window_controller as wc
+        w, move = self._setup(monkeypatch)
+        wc.snap_top()
+        move.assert_called_once_with(w, 0, 23 + 528.5, 1920, 528.5)
+
+    def test_snap_bottom(self, monkeypatch):
+        import src.window_controller as wc
+        w, move = self._setup(monkeypatch)
+        wc.snap_bottom()
+        move.assert_called_once_with(w, 0, 23, 1920, 528.5)
+
+    def test_snap_fullscreen(self, monkeypatch):
+        import src.window_controller as wc
+        w, move = self._setup(monkeypatch)
+        wc.snap_fullscreen()
+        move.assert_called_once_with(w, 0, 23, 1920, 1057)
+
+    def test_snap_skips_when_no_window(self, monkeypatch):
+        import src.window_controller as wc
+        monkeypatch.setattr(wc, "_get_focused_window", lambda: None)
+        mock_move = MagicMock()
+        monkeypatch.setattr(wc, "_move_window", mock_move)
+        wc.snap_left()
+        mock_move.assert_not_called()
