@@ -1,16 +1,12 @@
 from ApplicationServices import (
-    AXUIElementCreateApplication,
-    AXUIElementCopyAttributeValue,
     AXUIElementSetAttributeValue,
     AXValueCreate,
-    kAXFocusedWindowAttribute,
     kAXPositionAttribute,
     kAXSizeAttribute,
     kAXValueTypeCGPoint,
     kAXValueTypeCGSize,
-    kAXErrorSuccess,
 )
-from AppKit import NSWorkspace, NSScreen
+from AppKit import NSScreen
 import Quartz
 
 

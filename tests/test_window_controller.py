@@ -39,6 +39,8 @@ class TestMoveWindow:
         fake_pos_val = MagicMock()
         fake_size_val = MagicMock()
 
+        ax.AXUIElementSetAttributeValue.reset_mock()
+        ax.AXValueCreate.reset_mock()
         ax.AXValueCreate.side_effect = [fake_pos_val, fake_size_val]
 
         from src.window_controller import _move_window
@@ -46,9 +48,8 @@ class TestMoveWindow:
 
         quartz.CGPoint.assert_called_once_with(10, 20)
         quartz.CGSize.assert_called_once_with(960, 1057)
-        ax.AXUIElementSetAttributeValue.assert_any_call(
-            fake_window, ax.kAXPositionAttribute, fake_pos_val
-        )
-        ax.AXUIElementSetAttributeValue.assert_any_call(
-            fake_window, ax.kAXSizeAttribute, fake_size_val
-        )
+        expected_calls = [
+            call(fake_window, ax.kAXPositionAttribute, fake_pos_val),
+            call(fake_window, ax.kAXSizeAttribute, fake_size_val),
+        ]
+        assert ax.AXUIElementSetAttributeValue.call_args_list == expected_calls
