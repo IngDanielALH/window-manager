@@ -57,17 +57,35 @@ CHAR_MAP = {
 }
 
 
+_debug = False
+
+
+def enable_debug():
+    global _debug
+    _debug = True
+
+
 def _handle_event(event):
     flags = event.modifierFlags() & _MOD_MASK
+    key_code = event.keyCode()
+    chars = event.charactersIgnoringModifiers()
+
+    if _debug:
+        ctrl = bool(flags & NSEventModifierFlagControl)
+        opt  = bool(flags & NSEventModifierFlagOption)
+        shft = bool(flags & NSEventModifierFlagShift)
+        print(
+            f"[debug] ctrl={ctrl} opt={opt} shift={shft} | "
+            f"keyCode={key_code} | chars={repr(chars)}",
+            flush=True,
+        )
 
     # 1. Try special keys (arrows, enter) by key code
-    action = KEYCODE_MAP.get((flags, event.keyCode()))
+    action = KEYCODE_MAP.get((flags, key_code))
 
     # 2. Try letter keys by character, ignoring modifiers (layout-aware)
-    if action is None:
-        chars = event.charactersIgnoringModifiers()
-        if chars:
-            action = CHAR_MAP.get((flags, chars.lower()))
+    if action is None and chars:
+        action = CHAR_MAP.get((flags, chars.lower()))
 
     if action:
         action()

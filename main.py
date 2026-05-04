@@ -60,6 +60,11 @@ def main():
         print(s)
     print("\nPress Ctrl+C to quit.\n")
 
+    if "--debug" in sys.argv:
+        from src.hotkeys import enable_debug
+        enable_debug()
+        print("[debug] key events will be logged to stdout\n")
+
     # NSApplicationActivationPolicyProhibited (2): no Dock icon, purely background
     app = NSApplication.sharedApplication()
     app.setActivationPolicy_(2)
