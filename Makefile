@@ -16,7 +16,7 @@ install:
 	$(PIP) install -r requirements.txt
 
 run:
-	$(PYTHON) main.py
+	$(PYTHON) main.py $(ARGS)
 
 test:
 	$(PYTEST) tests/ -v
