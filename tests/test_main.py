@@ -32,17 +32,20 @@ class TestMain:
             check=False,
         )
 
-    def test_starts_listener_and_runs_loop_when_trusted(self):
+    def test_starts_listener_and_runs_app_when_trusted(self):
         fake_monitor = MagicMock()
+        fake_app = MagicMock()
+        fake_app.run.side_effect = SystemExit(0)
+
         with patch("main.AXIsProcessTrusted", return_value=True), \
              patch("main.NSApplication") as mock_nsapp, \
+             patch("main.NSEvent"), \
+             patch("main.signal"), \
              patch("main.start_listener", return_value=fake_monitor), \
-             patch("main.NSRunLoop") as mock_runloop, \
-             patch("main.NSDate"), \
-             patch("main.NSEvent") as mock_event:
-            mock_runloop.mainRunLoop.return_value.runUntilDate_.side_effect = KeyboardInterrupt
+             pytest.raises(SystemExit):
+            mock_nsapp.sharedApplication.return_value = fake_app
             import main
             main.main()
 
-        mock_nsapp.sharedApplication.assert_called_once()
-        mock_event.removeMonitor_.assert_called_once_with(fake_monitor)
+        fake_app.setActivationPolicy_.assert_called_once_with(2)
+        fake_app.run.assert_called_once()

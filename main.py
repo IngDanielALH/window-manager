@@ -1,6 +1,7 @@
 from ApplicationServices import AXIsProcessTrusted
-from AppKit import NSApplication, NSEvent, NSRunLoop, NSDate
+from AppKit import NSApplication, NSEvent
 from src.hotkeys import start_listener
+import signal
 import subprocess
 import sys
 
@@ -42,15 +43,20 @@ def main():
         print(s)
     print("\nPress Ctrl+C to quit.\n")
 
-    NSApplication.sharedApplication()  # required for NSEvent monitors to receive events
+    # NSApplicationActivationPolicyProhibited (2): no Dock icon, purely background
+    app = NSApplication.sharedApplication()
+    app.setActivationPolicy_(2)
 
     monitor = start_listener()
-    try:
-        while True:
-            NSRunLoop.mainRunLoop().runUntilDate_(NSDate.dateWithTimeIntervalSinceNow_(0.5))
-    except KeyboardInterrupt:
+
+    def _quit(signum, frame):
         NSEvent.removeMonitor_(monitor)
         print("\nStopped.")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, _quit)
+
+    app.run()
 
 
 if __name__ == "__main__":
