@@ -1,5 +1,5 @@
 from ApplicationServices import AXIsProcessTrusted
-from AppKit import NSEvent, NSRunLoop, NSDate
+from AppKit import NSApplication, NSEvent, NSRunLoop, NSDate
 from src.hotkeys import start_listener
 import subprocess
 import sys
@@ -41,6 +41,8 @@ def main():
     for s in SHORTCUTS:
         print(s)
     print("\nPress Ctrl+C to quit.\n")
+
+    NSApplication.sharedApplication()  # required for NSEvent monitors to receive events
 
     monitor = start_listener()
     try:

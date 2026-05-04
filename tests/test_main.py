@@ -35,6 +35,7 @@ class TestMain:
     def test_starts_listener_and_runs_loop_when_trusted(self):
         fake_monitor = MagicMock()
         with patch("main.AXIsProcessTrusted", return_value=True), \
+             patch("main.NSApplication") as mock_nsapp, \
              patch("main.start_listener", return_value=fake_monitor), \
              patch("main.NSRunLoop") as mock_runloop, \
              patch("main.NSDate"), \
@@ -43,4 +44,5 @@ class TestMain:
             import main
             main.main()
 
+        mock_nsapp.sharedApplication.assert_called_once()
         mock_event.removeMonitor_.assert_called_once_with(fake_monitor)
