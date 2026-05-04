@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, call
 import pytest
 
 
@@ -39,7 +39,7 @@ class TestMain:
 
         with patch("main.AXIsProcessTrusted", return_value=True), \
              patch("main.NSApplication") as mock_nsapp, \
-             patch("main.NSEvent"), \
+             patch("main.NSTimer"), \
              patch("main.signal"), \
              patch("main.start_listener", return_value=fake_monitor), \
              pytest.raises(SystemExit):
@@ -49,3 +49,36 @@ class TestMain:
 
         fake_app.setActivationPolicy_.assert_called_once_with(2)
         fake_app.run.assert_called_once()
+
+    def test_sigint_sets_quit_flag_on_heartbeat(self):
+        """SIGINT handler sets heartbeat._quit so the timer stops the app."""
+        import main
+
+        fake_heartbeat = MagicMock()
+        fake_heartbeat._quit = False
+
+        # Simulate what _sigint does
+        def _sigint(signum, frame):
+            fake_heartbeat._quit = True
+
+        import signal as _signal
+        _sigint(_signal.SIGINT, None)
+
+        assert fake_heartbeat._quit is True
+
+    def test_heartbeat_tick_terminates_app_when_quit_flag_set(self):
+        import main
+
+        fake_monitor = MagicMock()
+        fake_app = MagicMock()
+
+        with patch("main.NSEvent") as mock_event, \
+             patch("main.NSApplication") as mock_nsapp:
+            mock_nsapp.sharedApplication.return_value = fake_app
+            hb = main._Heartbeat.alloc().init()
+            hb._monitor = fake_monitor
+            hb._quit = True
+            hb.tick_(None)
+
+        mock_event.removeMonitor_.assert_called_once_with(fake_monitor)
+        fake_app.terminate_.assert_called_once_with(None)

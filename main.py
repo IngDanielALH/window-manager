@@ -1,5 +1,6 @@
 from ApplicationServices import AXIsProcessTrusted
 from AppKit import NSApplication, NSEvent
+from Foundation import NSObject, NSTimer
 from src.hotkeys import start_listener
 import signal
 import subprocess
@@ -21,6 +22,22 @@ SHORTCUTS = [
     "  Displays",
     "    ⌃⌥⇧→      Next        ⌃⌥⇧←      Previous",
 ]
+
+
+class _Heartbeat(NSObject):
+    """
+    Repeating timer whose sole purpose is to yield back to Python every
+    0.5 s so that pending signals (e.g. SIGINT) can be processed.
+    NSApp.run() is a C-level blocking call; without this, Ctrl+C is ignored.
+    """
+    # Set after alloc().init() to avoid custom NSObject init
+    _monitor = None
+    _quit = False
+
+    def tick_(self, timer):
+        if self._quit:
+            NSEvent.removeMonitor_(self._monitor)
+            NSApplication.sharedApplication().terminate_(None)
 
 
 def main():
@@ -49,14 +66,20 @@ def main():
 
     monitor = start_listener()
 
-    def _quit(signum, frame):
-        NSEvent.removeMonitor_(monitor)
-        print("\nStopped.")
-        sys.exit(0)
+    heartbeat = _Heartbeat.alloc().init()
+    heartbeat._monitor = monitor
+    NSTimer.scheduledTimerWithTimeInterval_target_selector_userInfo_repeats_(
+        0.5, heartbeat, "tick:", None, True
+    )
 
-    signal.signal(signal.SIGINT, _quit)
+    def _sigint(signum, frame):
+        # Set flag — the heartbeat timer will call app.terminate_() on the next tick
+        heartbeat._quit = True
+
+    signal.signal(signal.SIGINT, _sigint)
 
     app.run()
+    print("\nStopped.")
 
 
 if __name__ == "__main__":
